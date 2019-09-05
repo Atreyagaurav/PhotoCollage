@@ -5,6 +5,11 @@ VisualStudioVersion = 15.0.28307.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PhotoCollage", "PhotoCollage\PhotoCollage.pyproj", "{9F4D8E9B-B38A-4AB5-A813-16E6C351E441}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pictures", "Pictures", "{75C789CE-AE78-475D-8AE1-F339FF70A7E0}"
+	ProjectSection(SolutionItems) = preProject
+		PhotoCollage\Pictures\MyPic.jpg = PhotoCollage\Pictures\MyPic.jpg
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

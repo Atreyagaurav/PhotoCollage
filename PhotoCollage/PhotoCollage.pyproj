@@ -5,8 +5,7 @@
     <ProjectGuid>9f4d8e9b-b38a-4ab5-a813-16e6c351e441</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>PhotoCollage.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>C:\Users\allma\AppData\Local\Programs\Python\Python37-32\Lib;C:\Users\allma\AppData\Local\Programs\Python\Python37-32\Scripts</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>PhotoCollage</Name>
