@@ -53,12 +53,17 @@ def PlaceOutline(canv,x,y,res,str):
 	dim=(height,width)
 	rect=canv.create_rectangle(x,y,x+width,y+height)
 	return rect
-def AddNewInFileName(filename):
+def AddNewInFileName(filename,targetFolder=''):
 	fnames=filename.split('.')
 	ext=fnames[-1]
 	fnames=fnames[:-1]
 	fnames[-1]=fnames[-1]+"_collage"
-	return ".".join(fnames)+"."+ext
+	finalName= ".".join(fnames)+"."+ext
+	if (targetFolder==''):
+		return finalName
+	else:
+		fnames=finalName.split('/')
+		return targetFolder+'/'+fnames[-1]
 def ProcessFileName(filename):
 	fnames=filename.split('/')
 	ext=fnames[-1]

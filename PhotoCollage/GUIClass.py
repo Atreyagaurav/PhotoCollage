@@ -4,6 +4,7 @@ import numpy as np
 from tkinter import filedialog
 from PIL import ImageTk, Image
 from MainFunctions import *
+import os
 class MainMenuStripe:
 	def __init__(self,App):
 		self.App=App
@@ -12,13 +13,13 @@ class MainMenuStripe:
 		self.FileMenu = tk.Menu(self.Menu) 
 		self.Menu.add_cascade(label='File', menu=self.FileMenu) 
 		self.FileMenu.add_command(label='Open',command=self.App.OpenImage) 
-		self.FileMenu.add_command(label='Open New',command=self.App.OpenImageAsNew) 
+		self.FileMenu.add_command(label='Open As',command=self.App.OpenImageAsNew) 
 		self.FileMenu.add_command(label='Save',command=self.App.SaveImage) 
 		self.FileMenu.add_command(label='Save As',command=self.App.SaveAsImage) 
 		self.FileMenu.add_command(label='Exit', command=self.App.MainWindow.quit) 
 		self.HelpMenu = tk.Menu(self.Menu) 
 		self.Menu.add_cascade(label='Help', menu=self.HelpMenu) 
-		self.HelpMenu.add_command(label='About') 
+		self.HelpMenu.add_command(label='About',command=self.App.About) 
 class MainCanvas:
 	def __init__(self,App):
 		self.App=App
@@ -70,10 +71,12 @@ class MainCanvas:
 		self.ArrangementList.insert(3,'All MRP')
 		self.ArrangementList.insert(4,'Custom')
 		self.GenerateButton=tk.Button(self.Options,text="Generate",command=self.App.GenerateImage)
-		self.GenerateButton.grid(row=4,column=0,columnspan=4)
+		self.GenerateButton.grid(row=4,column=0,columnspan=2)
+		self.BatchGenerateButton=tk.Button(self.Options,text="Batch Generate",command=self.App.BatchProcessing)
+		self.BatchGenerateButton.grid(row=4,column=2,columnspan=2)
 class MainApp:
 	def __init__(self):
-		self.OrginalFilename=None
+		self.OriginalFilename=None
 		self.FinalFilename=None
 		self.InitialImage= None
 		self.FinalImage= None
@@ -89,15 +92,19 @@ class MainApp:
 		self.MenuStripe= MainMenuStripe(self)
 		self.Canvas=MainCanvas(self)
 		self.MainWindow.mainloop()
+	def About(self):
+		os.startfile("https://github.com/Atreyagaurav/PhotoCollage")
 	def OpenImage(self):
-		self.OrginalFilename =  filedialog.askopenfilename(initialdir = "/",
+		self.OriginalFilename =  filedialog.askopenfilename(initialdir = "/",
 			title = "Open Image",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
-		if(self.OrginalFilename):
-			self.MainWindow.title(self.OrginalFilename)
-			self.FinalFilename=AddNewInFileName(self.OrginalFilename)
+		self.ReadyOpenImage()
+	def ReadyOpenImage(self):
+		if(self.OriginalFilename):
+			self.MainWindow.title(self.OriginalFilename)
+			self.FinalFilename=AddNewInFileName(self.OriginalFilename)
 			self.SavedState=False
-			self.InitialImage=ImageTk.PhotoImage(Image.open(self.OrginalFilename))
-			self.InitialImageValue=cv2.imread(self.OrginalFilename)
+			self.InitialImage=ImageTk.PhotoImage(Image.open(self.OriginalFilename))
+			self.InitialImageValue=cv2.imread(self.OriginalFilename)
 			self.Image_onCanvas= self.Canvas.canvas1.create_image(200,300,image=self.InitialImage,anchor="center")
 			self.FinalImage=ImageTk.PhotoImage(Image.new("RGB",(400,600),"white"))
 			self.Image_onCanvas2=self.Canvas.canvas2.create_image(200,300,image=self.FinalImage,anchor="center")
@@ -107,7 +114,7 @@ class MainApp:
 		pass
 	def SaveImage(self):
 		if(not self.FinalFilename):
-			self.FinalFilename =AddNewInFileName(self.OrginalFilename)
+			self.FinalFilename =AddNewInFileName(self.OriginalFilename)
 		self.FinalFilename=ProcessFileName(filedialog.asksaveasfilename(initialdir = self.FinalFilename,
 			title = "Save Image",filetypes = (("jpeg files","*.jpg"),("all files","*.*"))))
 		cv2.imwrite(self.FinalFilename,self.FinalImageValue)
@@ -128,7 +135,17 @@ class MainApp:
 		self.Resolution=int(self.Canvas.ResolutionVariable.get())
 		self.Canvas.InitialImageHeightValue.insert(0,self.InitialImageValue.shape[0]/self.Resolution)
 		self.Canvas.InitialImageWidthValue.insert(0,self.InitialImageValue.shape[0]/self.Resolution)
-
-
-
+	def BatchProcessing(self):
+		SourceFolder=filedialog.askdirectory(title="Select Folder with Images")
+		TargetFolder=filedialog.askdirectory(title="Select Folder to Save Final Images")
+		os.chdir(SourceFolder)
+		ImgFiles=iter(os.listdir(SourceFolder))
+		self.SavedState=False
+		for ImgFile in ImgFiles:
+			self.OriginalFilename=ImgFile
+			self.ReadyOpenImage()
+			self.GenerateImage()
+			self.FinalFilename=AddNewInFileName(ImgFile,TargetFolder)
+			cv2.imwrite(self.FinalFilename,self.FinalImageValue)
+		self.SavedState=True
 
