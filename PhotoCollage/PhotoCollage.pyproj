@@ -10,6 +10,7 @@
     <OutputPath>.</OutputPath>
     <Name>PhotoCollage</Name>
     <RootNamespace>PhotoCollage</RootNamespace>
+    <PublishUrl>d:\</PublishUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

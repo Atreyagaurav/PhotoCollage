@@ -32,9 +32,11 @@ class MainCanvas:
 		self.Canvas2Objects=[]
 		self.Options=tk.Frame(self.App.MainWindow)
 		self.Options.grid(sticky="N",row=0,column=2)
+		self.ResolutionVariable=tk.StringVar()
 		self.ResolutionLabel=tk.Label(self.Options,text="Resolution")
-		self.ResolutionValue=tk.Entry(self.Options,width=5)
-		self.ResolutionValue.insert(0,self.App.Resolution)
+		self.ResolutionValue=tk.Entry(self.Options,width=5,textvariable=self.ResolutionVariable)
+		self.ResolutionVariable.trace_variable("w",self.App.Resolution_change)
+		self.ResolutionVariable.set(self.App.Resolution)
 		self.ResolutionUnit=tk.Label(self.Options,text="dpi")
 		self.ResolutionLabel.grid(sticky="E",row=0)
 		self.ResolutionValue.grid(row=0,column=1)
@@ -75,15 +77,18 @@ class MainApp:
 		self.FinalFilename=None
 		self.InitialImage= None
 		self.FinalImage= None
+		self.Image_onCanvas= None
+		self.Image_onCanvas2= None
 		self.InitialImageValue= None
 		self.FinalImageValue= 255*np.ones((600,400,3),np.uint8)
 		self.Resolution=100
-		self.SavedState=False
+		self.SavedState=False		
 		self.MainWindow= tk.Tk()
 		self.MainWindow.geometry("1000x500")
 		self.MainWindow.title("Untitled.jpg")
 		self.MenuStripe= MainMenuStripe(self)
 		self.Canvas=MainCanvas(self)
+		self.MainWindow.mainloop()
 	def OpenImage(self):
 		self.OrginalFilename =  filedialog.askopenfilename(initialdir = "/",
 			title = "Open Image",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
@@ -93,9 +98,11 @@ class MainApp:
 			self.SavedState=False
 			self.InitialImage=ImageTk.PhotoImage(Image.open(self.OrginalFilename))
 			self.InitialImageValue=cv2.imread(self.OrginalFilename)
-			self.Canvas.canvas1.create_image(200,300,image=self.InitialImage,anchor="center")
+			self.Image_onCanvas= self.Canvas.canvas1.create_image(200,300,image=self.InitialImage,anchor="center")
 			self.FinalImage=ImageTk.PhotoImage(Image.new("RGB",(400,600),"white"))
-			self.Canvas.canvas2.create_image(200,300,image=self.FinalImage,anchor="center")
+			self.Image_onCanvas2=self.Canvas.canvas2.create_image(200,300,image=self.FinalImage,anchor="center")
+			self.Canvas.InitialImageHeightValue.insert(0,self.InitialImageValue.shape[0]/self.Resolution)
+			self.Canvas.InitialImageWidthValue.insert(0,self.InitialImageValue.shape[0]/self.Resolution)
 	def OpenImageAsNew(self):
 		pass
 	def SaveImage(self):
@@ -109,5 +116,19 @@ class MainApp:
 		pass
 	def GenerateImage(self):
 		self.SavedState=False
+		self.Resolution=int(self.Canvas.ResolutionValue.get())
+		self.FinalImageValue=255*np.ones((6*self.Resolution,4*self.Resolution,3),np.uint8)
+		self.FinalImageValue=PlaceImages(self)
+		b,g,r=cv2.split(self.FinalImageValue)
+		self.FinalImage=ImageTk.PhotoImage(Image.fromarray(cv2.merge((r,g,b))))
+		self.Canvas.canvas2.itemconfig(self.Image_onCanvas2,image=self.FinalImage)
+	def Resolution_change(self,*args):
+		if(not self.Canvas.ResolutionValue.get()):
+			return
+		self.Resolution=int(self.Canvas.ResolutionVariable.get())
+		self.Canvas.InitialImageHeightValue.insert(0,self.InitialImageValue.shape[0]/self.Resolution)
+		self.Canvas.InitialImageWidthValue.insert(0,self.InitialImageValue.shape[0]/self.Resolution)
+
+
 
 
