@@ -12,10 +12,10 @@ class MainMenuStripe:
 		self.App.MainWindow.config(menu=self.Menu) 
 		self.FileMenu = tk.Menu(self.Menu) 
 		self.Menu.add_cascade(label='File', menu=self.FileMenu) 
+		self.FileMenu.add_command(label='New',command=self.App.OpenImageAsNew) 
 		self.FileMenu.add_command(label='Open',command=self.App.OpenImage) 
-		self.FileMenu.add_command(label='Open As',command=self.App.OpenImageAsNew) 
 		self.FileMenu.add_command(label='Save',command=self.App.SaveImage) 
-		self.FileMenu.add_command(label='Save As',command=self.App.SaveAsImage) 
+		self.FileMenu.add_command(label='Save Original',command=self.App.SaveAsImage) 
 		self.FileMenu.add_command(label='Exit', command=self.App.MainWindow.quit) 
 		self.HelpMenu = tk.Menu(self.Menu) 
 		self.Menu.add_cascade(label='Help', menu=self.HelpMenu) 
@@ -36,8 +36,8 @@ class MainCanvas:
 		self.ResolutionVariable=tk.StringVar()
 		self.ResolutionLabel=tk.Label(self.Options,text="Resolution")
 		self.ResolutionValue=tk.Entry(self.Options,width=5,textvariable=self.ResolutionVariable)
-		self.ResolutionVariable.trace_variable("w",self.App.Resolution_change)
 		self.ResolutionVariable.set(self.App.Resolution)
+		self.ResolutionVariable.trace_variable("w",self.App.Resolution_change)
 		self.ResolutionUnit=tk.Label(self.Options,text="dpi")
 		self.ResolutionLabel.grid(sticky="E",row=0)
 		self.ResolutionValue.grid(row=0,column=1)
@@ -130,7 +130,7 @@ class MainApp:
 		self.FinalImage=ImageTk.PhotoImage(Image.fromarray(cv2.merge((r,g,b))))
 		self.Canvas.canvas2.itemconfig(self.Image_onCanvas2,image=self.FinalImage)
 	def Resolution_change(self,*args):
-		if(not self.Canvas.ResolutionValue.get()):
+		if((not self.Canvas.ResolutionValue.get()) or self.InitialImageValue==None):
 			return
 		self.Resolution=int(self.Canvas.ResolutionVariable.get())
 		self.Canvas.InitialImageHeightValue.insert(0,self.InitialImageValue.shape[0]/self.Resolution)
@@ -142,8 +142,7 @@ class MainApp:
 		ImgFiles=iter(os.listdir(SourceFolder))
 		self.SavedState=False
 		for ImgFile in ImgFiles:
-			self.OriginalFilename=ImgFile
-			self.ReadyOpenImage()
+			self.OpenImage(ImgFile)
 			self.GenerateImage()
 			self.FinalFilename=AddNewInFileName(ImgFile,TargetFolder)
 			cv2.imwrite(self.FinalFilename,self.FinalImageValue)
